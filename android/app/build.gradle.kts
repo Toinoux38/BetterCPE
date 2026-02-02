@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.mycpe_plus"
+    namespace = "com.fluffin.mycpe_plus"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
