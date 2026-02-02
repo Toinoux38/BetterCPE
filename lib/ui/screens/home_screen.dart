@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:provider/provider.dart';
@@ -11,19 +12,16 @@ import 'settings_screen.dart';
 /// Main home screen with bottom navigation
 class HomeScreen extends StatefulWidget {
   final VoidCallback onLogout;
-  
-  const HomeScreen({
-    super.key,
-    required this.onLogout,
-  });
-  
+
+  const HomeScreen({super.key, required this.onLogout});
+
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
-  
+
   List<_NavItem> _getNavItems(SettingsProvider settings) {
     return [
       _NavItem(
@@ -43,29 +41,38 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     ];
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Consumer<SettingsProvider>(
       builder: (context, settings, _) {
         final navItems = _getNavItems(settings);
-        
-        return Scaffold(
-          body: IndexedStack(
-            index: _currentIndex,
-            children: const [
-              PlanningScreen(),
-              GradesScreen(),
-              SettingsScreen(),
-            ],
+
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          value: const SystemUiOverlayStyle(
+            statusBarBrightness: Brightness.light,
+            statusBarIconBrightness: Brightness.dark,
+            statusBarColor: Colors.transparent,
+            systemNavigationBarColor: Colors.white,
+            systemNavigationBarIconBrightness: Brightness.dark,
           ),
-          extendBody: true,
-          bottomNavigationBar: _buildBottomNavigationBar(navItems),
+          child: Scaffold(
+            body: IndexedStack(
+              index: _currentIndex,
+              children: const [
+                PlanningScreen(),
+                GradesScreen(),
+                SettingsScreen(),
+              ],
+            ),
+            extendBody: true,
+            bottomNavigationBar: _buildBottomNavigationBar(navItems),
+          ),
         );
       },
     );
   }
-  
+
   Widget _buildBottomNavigationBar(List<_NavItem> navItems) {
     return Container(
       margin: const EdgeInsets.fromLTRB(24, 0, 24, 24),
@@ -90,10 +97,10 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-  
+
   Widget _buildNavItem(int index, _NavItem item) {
     final isSelected = _currentIndex == index;
-    
+
     return GestureDetector(
       onTap: () => setState(() => _currentIndex = index),
       behavior: HitTestBehavior.opaque,

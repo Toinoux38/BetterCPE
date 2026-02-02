@@ -16,28 +16,30 @@ import 'ui/app_shell.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Set preferred orientations
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-  
+
   // Set system UI overlay style
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.light,
+      systemNavigationBarColor: Colors.white,
+      systemNavigationBarIconBrightness: Brightness.dark,
     ),
   );
-  
+
   runApp(const StudentApp());
 }
 
 /// Main application widget
 class StudentApp extends StatefulWidget {
   const StudentApp({super.key});
-  
+
   @override
   State<StudentApp> createState() => _StudentAppState();
 }
@@ -49,13 +51,13 @@ class _StudentAppState extends State<StudentApp> {
   late final AuthService _authService;
   late final PlanningService _planningService;
   late final GradesService _gradesService;
-  
+
   @override
   void initState() {
     super.initState();
     _initializeServices();
   }
-  
+
   void _initializeServices() {
     _apiClient = ApiClient();
     _tokenStorage = TokenStorage();
@@ -66,20 +68,18 @@ class _StudentAppState extends State<StudentApp> {
     _planningService = PlanningService(apiClient: _apiClient);
     _gradesService = GradesService(apiClient: _apiClient);
   }
-  
+
   @override
   void dispose() {
     _apiClient.dispose();
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (_) => SettingsProvider()..initialize(),
-        ),
+        ChangeNotifierProvider(create: (_) => SettingsProvider()..initialize()),
         ChangeNotifierProvider(
           create: (_) => AuthProvider(authService: _authService),
         ),
