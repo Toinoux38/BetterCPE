@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
@@ -63,92 +62,89 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final strings = context.watch<SettingsProvider>().strings;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
-        statusBarBrightness: Brightness.light,
-        statusBarIconBrightness: Brightness.dark,
-        statusBarColor: Colors.transparent,
-        systemNavigationBarColor: Colors.white,
-        systemNavigationBarIconBrightness: Brightness.dark,
-      ),
-      child: Scaffold(
-        backgroundColor: AppColors.background,
-        body: Stack(
-          children: [
-            // Background image extending behind the card
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: Image.asset(
-                'assets/images/login_hero.png',
-                width: double.infinity,
-                fit: BoxFit.fitWidth,
-                alignment: Alignment.topCenter,
-              ),
+    return Scaffold(
+      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
+      body: Stack(
+        children: [
+          // Background image extending behind the card
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Image.asset(
+              'assets/images/login_hero.png',
+              width: double.infinity,
+              fit: BoxFit.fitWidth,
+              alignment: Alignment.topCenter,
             ),
-            // White card overlapping the image
-            Positioned(
-              top: MediaQuery.of(context).size.height * 0.35,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: Container(
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(32),
-                    topRight: Radius.circular(32),
-                  ),
+          ),
+          // White card overlapping the image
+          Positioned(
+            top: MediaQuery.of(context).size.height * 0.35,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: isDark ? AppColors.surfaceDark : Colors.white,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(32),
+                  topRight: Radius.circular(32),
                 ),
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(28, 40, 28, 28),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(
-                          strings.signIn,
-                          style: GoogleFonts.poppins(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                          ),
-                          textAlign: TextAlign.center,
+              ),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(28, 40, 28, 28),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        strings.signIn,
+                        style: GoogleFonts.poppins(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w600,
+                          color: isDark
+                              ? AppColors.textPrimaryDark
+                              : AppColors.textPrimary,
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          strings.signInToAccess,
-                          style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            color: AppColors.textSecondary,
-                          ),
-                          textAlign: TextAlign.center,
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        strings.signInToAccess,
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: isDark
+                              ? AppColors.textSecondaryDark
+                              : AppColors.textSecondary,
                         ),
-                        const SizedBox(height: 32),
-                        _buildUsernameField(strings),
-                        const SizedBox(height: 20),
-                        _buildPasswordField(strings),
-                        const SizedBox(height: 28),
-                        _buildLoginButton(strings),
-                        const SizedBox(height: 24),
-                        _buildFooter(),
-                      ],
-                    ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 32),
+                      _buildUsernameField(strings),
+                      const SizedBox(height: 20),
+                      _buildPasswordField(strings),
+                      const SizedBox(height: 28),
+                      _buildLoginButton(strings),
+                      const SizedBox(height: 24),
+                      _buildFooter(),
+                    ],
                   ),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildUsernameField(dynamic strings) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -157,15 +153,19 @@ class _LoginScreenState extends State<LoginScreen> {
           style: GoogleFonts.poppins(
             fontSize: 14,
             fontWeight: FontWeight.w500,
-            color: AppColors.textPrimary,
+            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
           ),
         ),
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: AppColors.surfaceVariant,
+            color: isDark
+                ? AppColors.surfaceVariantDark
+                : AppColors.surfaceVariant,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.border),
+            border: Border.all(
+              color: isDark ? AppColors.borderDark : AppColors.border,
+            ),
           ),
           child: Row(
             children: [
@@ -174,10 +174,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   controller: _usernameController,
                   keyboardType: TextInputType.emailAddress,
                   textInputAction: TextInputAction.next,
+                  autocorrect: false,
+                  enableSuggestions: false,
                   decoration: InputDecoration(
                     hintText: strings.usernameHint,
                     hintStyle: GoogleFonts.poppins(
-                      color: AppColors.textSecondary,
+                      color: isDark
+                          ? AppColors.textSecondaryDark
+                          : AppColors.textSecondary,
                       fontSize: 14,
                     ),
                     border: InputBorder.none,
@@ -185,14 +189,18 @@ class _LoginScreenState extends State<LoginScreen> {
                       horizontal: 16,
                       vertical: 14,
                     ),
-                    prefixIcon: const Icon(
+                    prefixIcon: Icon(
                       Icons.person_outline,
-                      color: AppColors.textSecondary,
+                      color: isDark
+                          ? AppColors.textSecondaryDark
+                          : AppColors.textSecondary,
                     ),
                   ),
                   style: GoogleFonts.poppins(
                     fontSize: 14,
-                    color: AppColors.textPrimary,
+                    color: isDark
+                        ? AppColors.textPrimaryDark
+                        : AppColors.textPrimary,
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -227,6 +235,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildPasswordField(dynamic strings) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -235,15 +244,19 @@ class _LoginScreenState extends State<LoginScreen> {
           style: GoogleFonts.poppins(
             fontSize: 14,
             fontWeight: FontWeight.w500,
-            color: AppColors.textPrimary,
+            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
           ),
         ),
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: AppColors.surfaceVariant,
+            color: isDark
+                ? AppColors.surfaceVariantDark
+                : AppColors.surfaceVariant,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.border),
+            border: Border.all(
+              color: isDark ? AppColors.borderDark : AppColors.border,
+            ),
           ),
           child: TextFormField(
             controller: _passwordController,
@@ -253,7 +266,9 @@ class _LoginScreenState extends State<LoginScreen> {
             decoration: InputDecoration(
               hintText: strings.passwordHint,
               hintStyle: GoogleFonts.poppins(
-                color: AppColors.textSecondary,
+                color: isDark
+                    ? AppColors.textSecondaryDark
+                    : AppColors.textSecondary,
                 fontSize: 14,
               ),
               border: InputBorder.none,
@@ -261,14 +276,16 @@ class _LoginScreenState extends State<LoginScreen> {
                 horizontal: 16,
                 vertical: 14,
               ),
-              prefixIcon: const Icon(
+              prefixIcon: Icon(
                 Icons.lock_outline,
-                color: AppColors.textSecondary,
+                color: isDark
+                    ? AppColors.textSecondaryDark
+                    : AppColors.textSecondary,
               ),
             ),
             style: GoogleFonts.poppins(
               fontSize: 14,
-              color: AppColors.textPrimary,
+              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
@@ -338,9 +355,13 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildFooter() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Text(
       'Fluffin Studio © 2026',
-      style: GoogleFonts.poppins(fontSize: 12, color: AppColors.textSecondary),
+      style: GoogleFonts.poppins(
+        fontSize: 12,
+        color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+      ),
       textAlign: TextAlign.center,
     );
   }

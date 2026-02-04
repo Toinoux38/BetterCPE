@@ -17,9 +17,13 @@ class SettingsScreen extends StatelessWidget {
     return Consumer<SettingsProvider>(
       builder: (context, settings, _) {
         final strings = settings.strings;
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final backgroundColor = isDark
+            ? AppColors.backgroundDark
+            : AppColors.background;
 
         return Container(
-          color: AppColors.background,
+          color: backgroundColor,
           child: SafeArea(
             child: Column(
               children: [
@@ -45,6 +49,14 @@ class _SettingsHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimaryColor = isDark
+        ? AppColors.textPrimaryDark
+        : AppColors.textPrimary;
+    final textSecondaryColor = isDark
+        ? AppColors.textSecondaryDark
+        : AppColors.textSecondary;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
       child: Row(
@@ -71,14 +83,14 @@ class _SettingsHeader extends StatelessWidget {
                 style: GoogleFonts.poppins(
                   fontSize: 24,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+                  color: textPrimaryColor,
                 ),
               ),
               Text(
                 strings.appName,
                 style: GoogleFonts.poppins(
                   fontSize: 14,
-                  color: AppColors.textSecondary,
+                  color: textSecondaryColor,
                 ),
               ),
             ],
@@ -101,11 +113,13 @@ class _MainCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = settings.strings;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = isDark ? AppColors.surfaceDark : AppColors.surface;
 
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: surfaceColor,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
@@ -127,6 +141,11 @@ class _MainCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             _LanguageSelector(settings: settings),
+            const SizedBox(height: 24),
+            // Theme section
+            _SectionHeader(title: strings.theme, icon: Iconsax.moon),
+            const SizedBox(height: 12),
+            _ThemeSelector(settings: settings),
             const SizedBox(height: 24),
             // About section
             _SectionHeader(title: strings.about, icon: Iconsax.info_circle),
@@ -196,9 +215,21 @@ class _LanguageSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceVariantColor = isDark
+        ? AppColors.surfaceVariantDark
+        : AppColors.surfaceVariant;
+    final textPrimaryColor = isDark
+        ? AppColors.textPrimaryDark
+        : AppColors.textPrimary;
+    final textSecondaryColor = isDark
+        ? AppColors.textSecondaryDark
+        : AppColors.textSecondary;
+    final dividerColor = isDark ? AppColors.dividerDark : AppColors.divider;
+
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surfaceVariant,
+        color: surfaceVariantColor,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -236,14 +267,14 @@ class _LanguageSelector extends StatelessWidget {
                                 fontWeight: isSelected
                                     ? FontWeight.w600
                                     : FontWeight.w500,
-                                color: AppColors.textPrimary,
+                                color: textPrimaryColor,
                               ),
                             ),
                             Text(
                               _getLanguageNativeName(locale),
                               style: GoogleFonts.poppins(
                                 fontSize: 12,
-                                color: AppColors.textSecondary,
+                                color: textSecondaryColor,
                               ),
                             ),
                           ],
@@ -267,9 +298,7 @@ class _LanguageSelector extends StatelessWidget {
                           border: isSelected
                               ? null
                               : Border.all(
-                                  color: AppColors.textSecondary.withOpacity(
-                                    0.3,
-                                  ),
+                                  color: textSecondaryColor.withOpacity(0.3),
                                   width: 2,
                                 ),
                         ),
@@ -286,11 +315,11 @@ class _LanguageSelector extends StatelessWidget {
                 ),
               ),
               if (!isLast)
-                const Divider(
+                Divider(
                   height: 1,
                   indent: 16,
                   endIndent: 16,
-                  color: AppColors.divider,
+                  color: dividerColor,
                 ),
             ],
           );
@@ -319,6 +348,148 @@ class _LanguageSelector extends StatelessWidget {
 }
 
 // =============================================================================
+// THEME SELECTOR
+// =============================================================================
+
+class _ThemeSelector extends StatelessWidget {
+  final SettingsProvider settings;
+
+  const _ThemeSelector({required this.settings});
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = settings.strings;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceVariantColor = isDark
+        ? AppColors.surfaceVariantDark
+        : AppColors.surfaceVariant;
+    final surfaceColor = isDark ? AppColors.surfaceDark : AppColors.surface;
+    final textPrimaryColor = isDark
+        ? AppColors.textPrimaryDark
+        : AppColors.textPrimary;
+    final textSecondaryColor = isDark
+        ? AppColors.textSecondaryDark
+        : AppColors.textSecondary;
+    final dividerColor = isDark ? AppColors.dividerDark : AppColors.divider;
+
+    final themes = [
+      _ThemeOption(ThemeMode.system, strings.themeSystem, Iconsax.mobile),
+      _ThemeOption(ThemeMode.light, strings.themeLight, Iconsax.sun_1),
+      _ThemeOption(ThemeMode.dark, strings.themeDark, Iconsax.moon),
+    ];
+
+    return Container(
+      decoration: BoxDecoration(
+        color: surfaceVariantColor,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        children: themes.asMap().entries.map((entry) {
+          final index = entry.key;
+          final themeOption = entry.value;
+          final isSelected = settings.themeMode == themeOption.mode;
+          final isLast = index == themes.length - 1;
+
+          return Column(
+            children: [
+              InkWell(
+                onTap: () => settings.setThemeMode(themeOption.mode),
+                borderRadius: BorderRadius.circular(16),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? AppColors.gradientStart.withOpacity(0.1)
+                              : surfaceColor,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          themeOption.icon,
+                          size: 20,
+                          color: isSelected
+                              ? AppColors.gradientStart
+                              : textSecondaryColor,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Text(
+                          themeOption.label,
+                          style: GoogleFonts.poppins(
+                            fontSize: 15,
+                            fontWeight: isSelected
+                                ? FontWeight.w600
+                                : FontWeight.w500,
+                            color: textPrimaryColor,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        width: 24,
+                        height: 24,
+                        decoration: BoxDecoration(
+                          gradient: isSelected
+                              ? const LinearGradient(
+                                  colors: [
+                                    AppColors.gradientStart,
+                                    AppColors.gradientEnd,
+                                  ],
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                )
+                              : null,
+                          shape: BoxShape.circle,
+                          border: isSelected
+                              ? null
+                              : Border.all(
+                                  color: textSecondaryColor.withOpacity(0.3),
+                                  width: 2,
+                                ),
+                        ),
+                        child: isSelected
+                            ? const Icon(
+                                Icons.check,
+                                size: 14,
+                                color: Colors.white,
+                              )
+                            : null,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              if (!isLast)
+                Divider(
+                  height: 1,
+                  indent: 16,
+                  endIndent: 16,
+                  color: dividerColor,
+                ),
+            ],
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+
+class _ThemeOption {
+  final ThemeMode mode;
+  final String label;
+  final IconData icon;
+
+  const _ThemeOption(this.mode, this.label, this.icon);
+}
+
+// =============================================================================
 // ABOUT CARD
 // =============================================================================
 
@@ -329,10 +500,19 @@ class _AboutCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceVariantColor = isDark
+        ? AppColors.surfaceVariantDark
+        : AppColors.surfaceVariant;
+    final textPrimaryColor = isDark
+        ? AppColors.textPrimaryDark
+        : AppColors.textPrimary;
+    final dividerColor = isDark ? AppColors.dividerDark : AppColors.divider;
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.surfaceVariant,
+        color: surfaceVariantColor,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -363,7 +543,7 @@ class _AboutCard extends StatelessWidget {
                       style: GoogleFonts.poppins(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
+                        color: textPrimaryColor,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -398,7 +578,7 @@ class _AboutCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-          const Divider(height: 1, color: AppColors.divider),
+          Divider(height: 1, color: dividerColor),
           const SizedBox(height: 20),
           // Info rows
           _InfoRow(icon: Iconsax.building, label: 'School', value: 'CPE Lyon'),
@@ -429,24 +609,30 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = isDark ? AppColors.surfaceDark : AppColors.surface;
+    final textPrimaryColor = isDark
+        ? AppColors.textPrimaryDark
+        : AppColors.textPrimary;
+    final textSecondaryColor = isDark
+        ? AppColors.textSecondaryDark
+        : AppColors.textSecondary;
+
     return Row(
       children: [
         Container(
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: surfaceColor,
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Icon(icon, size: 18, color: AppColors.textSecondary),
+          child: Icon(icon, size: 18, color: textSecondaryColor),
         ),
         const SizedBox(width: 12),
         Text(
           label,
-          style: GoogleFonts.poppins(
-            fontSize: 14,
-            color: AppColors.textSecondary,
-          ),
+          style: GoogleFonts.poppins(fontSize: 14, color: textSecondaryColor),
         ),
         const Spacer(),
         Text(
@@ -454,7 +640,7 @@ class _InfoRow extends StatelessWidget {
           style: GoogleFonts.poppins(
             fontSize: 14,
             fontWeight: FontWeight.w500,
-            color: AppColors.textPrimary,
+            color: textPrimaryColor,
           ),
         ),
       ],
@@ -516,7 +702,9 @@ class _LogoutButton extends StatelessWidget {
                     settings.strings.signOutConfirmMessage,
                     style: GoogleFonts.poppins(
                       fontSize: 12,
-                      color: AppColors.textSecondary,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? AppColors.textSecondaryDark
+                          : AppColors.textSecondary,
                     ),
                   ),
                 ],
@@ -531,6 +719,14 @@ class _LogoutButton extends StatelessWidget {
 
   Future<void> _showLogoutDialog(BuildContext context) async {
     final strings = settings.strings;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimaryColor = isDark
+        ? AppColors.textPrimaryDark
+        : AppColors.textPrimary;
+    final textSecondaryColor = isDark
+        ? AppColors.textSecondaryDark
+        : AppColors.textSecondary;
+
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -540,15 +736,12 @@ class _LogoutButton extends StatelessWidget {
           style: GoogleFonts.poppins(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: textPrimaryColor,
           ),
         ),
         content: Text(
           strings.signOutConfirmMessage,
-          style: GoogleFonts.poppins(
-            fontSize: 14,
-            color: AppColors.textSecondary,
-          ),
+          style: GoogleFonts.poppins(fontSize: 14, color: textSecondaryColor),
         ),
         actions: [
           TextButton(
@@ -558,7 +751,7 @@ class _LogoutButton extends StatelessWidget {
               style: GoogleFonts.poppins(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: AppColors.textSecondary,
+                color: textSecondaryColor,
               ),
             ),
           ),

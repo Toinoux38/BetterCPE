@@ -7,6 +7,7 @@ import '../../core/theme/app_colors.dart';
 import '../../providers/settings_provider.dart';
 import 'planning_screen.dart';
 import 'grades_screen.dart';
+import 'absences_screen.dart';
 import 'settings_screen.dart';
 
 /// Main home screen with bottom navigation
@@ -35,6 +36,11 @@ class _HomeScreenState extends State<HomeScreen> {
         label: settings.strings.grades,
       ),
       _NavItem(
+        icon: Iconsax.calendar_remove_copy,
+        activeIcon: Iconsax.calendar_remove,
+        label: settings.strings.absences,
+      ),
+      _NavItem(
         icon: Iconsax.setting_2_copy,
         activeIcon: Iconsax.setting_2,
         label: settings.strings.settings,
@@ -48,37 +54,32 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (context, settings, _) {
         final navItems = _getNavItems(settings);
 
-        return AnnotatedRegion<SystemUiOverlayStyle>(
-          value: const SystemUiOverlayStyle(
-            statusBarBrightness: Brightness.light,
-            statusBarIconBrightness: Brightness.dark,
-            statusBarColor: Colors.transparent,
-            systemNavigationBarColor: Colors.white,
-            systemNavigationBarIconBrightness: Brightness.dark,
+        return Scaffold(
+          body: IndexedStack(
+            index: _currentIndex,
+            children: const [
+              PlanningScreen(),
+              GradesScreen(),
+              AbsencesScreen(),
+              SettingsScreen(),
+            ],
           ),
-          child: Scaffold(
-            body: IndexedStack(
-              index: _currentIndex,
-              children: const [
-                PlanningScreen(),
-                GradesScreen(),
-                SettingsScreen(),
-              ],
-            ),
-            extendBody: true,
-            bottomNavigationBar: _buildBottomNavigationBar(navItems),
-          ),
+          extendBody: true,
+          bottomNavigationBar: _buildBottomNavigationBar(navItems),
         );
       },
     );
   }
 
   Widget _buildBottomNavigationBar(List<_NavItem> navItems) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = isDark ? AppColors.surfaceDark : AppColors.surface;
+
     return Container(
       margin: const EdgeInsets.fromLTRB(24, 0, 24, 24),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: surfaceColor,
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
@@ -100,6 +101,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildNavItem(int index, _NavItem item) {
     final isSelected = _currentIndex == index;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textSecondaryColor = isDark
+        ? AppColors.textSecondaryDark
+        : AppColors.textSecondary;
 
     return GestureDetector(
       onTap: () => setState(() => _currentIndex = index),
@@ -125,7 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Icon(
               isSelected ? item.activeIcon : item.icon,
-              color: isSelected ? Colors.white : AppColors.textSecondary,
+              color: isSelected ? Colors.white : textSecondaryColor,
               size: 22,
             ),
             if (isSelected) ...[

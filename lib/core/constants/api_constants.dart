@@ -11,6 +11,9 @@ abstract final class ApiConstants {
   // Grades endpoints
   static const String gradesEndpoint = 'mes_notes';
   
+  // Absences endpoints
+  static const String absencesEndpoint = 'mes_absences';
+  
   // Request timeout
   static const Duration requestTimeout = Duration(seconds: 30);
 }

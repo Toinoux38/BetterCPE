@@ -25,6 +25,7 @@ abstract class AppStrings {
   String get planning;
   String get grades;
   String get settings;
+  String get absences;
 
   // Planning
   String get loadingSchedule;
@@ -64,11 +65,28 @@ abstract class AppStrings {
   String get pass;
   String get needsImprovement;
 
+  // Absences
+  String get loadingAbsences;
+  String get noAbsencesAvailable;
+  String get totalAbsences;
+  String get excusedAbsences;
+  String get unexcusedAbsences;
+  String get totalDuration;
+  String get reason;
+  String get excused;
+  String get notExcused;
+  String absencesCount(int count);
+
   // Settings
   String get language;
   String get selectLanguage;
   String get about;
   String get version;
+  String get theme;
+  String get selectTheme;
+  String get themeLight;
+  String get themeDark;
+  String get themeSystem;
 
   // Common
   String get retry;
@@ -156,6 +174,8 @@ class EnglishStrings implements AppStrings {
   String get grades => 'Grades';
   @override
   String get settings => 'Settings';
+  @override
+  String get absences => 'Absences';
 
   // Planning
   @override
@@ -227,6 +247,28 @@ class EnglishStrings implements AppStrings {
   @override
   String get needsImprovement => 'Needs Improvement';
 
+  // Absences
+  @override
+  String get loadingAbsences => 'Loading absences...';
+  @override
+  String get noAbsencesAvailable => 'No absences recorded';
+  @override
+  String get totalAbsences => 'Total Absences';
+  @override
+  String get excusedAbsences => 'Excused';
+  @override
+  String get unexcusedAbsences => 'Unexcused';
+  @override
+  String get totalDuration => 'Total Duration';
+  @override
+  String get reason => 'Reason';
+  @override
+  String get excused => 'Excused';
+  @override
+  String get notExcused => 'Not excused';
+  @override
+  String absencesCount(int count) => '$count absence${count > 1 ? 's' : ''}';
+
   // Settings
   @override
   String get language => 'Language';
@@ -236,6 +278,16 @@ class EnglishStrings implements AppStrings {
   String get about => 'About';
   @override
   String get version => 'Version';
+  @override
+  String get theme => 'Theme';
+  @override
+  String get selectTheme => 'Select Theme';
+  @override
+  String get themeLight => 'Light';
+  @override
+  String get themeDark => 'Dark';
+  @override
+  String get themeSystem => 'System';
 
   // Common
   @override
@@ -345,6 +397,8 @@ class FrenchStrings implements AppStrings {
   String get grades => 'Notes';
   @override
   String get settings => 'Paramètres';
+  @override
+  String get absences => 'Absences';
 
   // Planning
   @override
@@ -417,6 +471,28 @@ class FrenchStrings implements AppStrings {
   @override
   String get needsImprovement => 'Insuffisant';
 
+  // Absences
+  @override
+  String get loadingAbsences => 'Chargement des absences...';
+  @override
+  String get noAbsencesAvailable => 'Aucune absence enregistrée';
+  @override
+  String get totalAbsences => 'Total des absences';
+  @override
+  String get excusedAbsences => 'Justifiées';
+  @override
+  String get unexcusedAbsences => 'Non justifiées';
+  @override
+  String get totalDuration => 'Durée totale';
+  @override
+  String get reason => 'Motif';
+  @override
+  String get excused => 'Justifiée';
+  @override
+  String get notExcused => 'Non justifiée';
+  @override
+  String absencesCount(int count) => '$count absence${count > 1 ? 's' : ''}';
+
   // Settings
   @override
   String get language => 'Langue';
@@ -426,6 +502,16 @@ class FrenchStrings implements AppStrings {
   String get about => 'À propos';
   @override
   String get version => 'Version';
+  @override
+  String get theme => 'Thème';
+  @override
+  String get selectTheme => 'Choisir le thème';
+  @override
+  String get themeLight => 'Clair';
+  @override
+  String get themeDark => 'Sombre';
+  @override
+  String get themeSystem => 'Système';
 
   // Common
   @override

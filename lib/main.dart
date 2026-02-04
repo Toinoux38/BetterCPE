@@ -7,10 +7,12 @@ import 'data/services/api_client.dart';
 import 'data/services/auth_service.dart';
 import 'data/services/grades_service.dart';
 import 'data/services/planning_service.dart';
+import 'data/services/absences_service.dart';
 import 'data/services/token_storage.dart';
 import 'providers/auth_provider.dart';
 import 'providers/grades_provider.dart';
 import 'providers/planning_provider.dart';
+import 'providers/absences_provider.dart';
 import 'providers/settings_provider.dart';
 import 'ui/app_shell.dart';
 
@@ -23,13 +25,15 @@ void main() {
     DeviceOrientation.portraitDown,
   ]);
 
-  // Set system UI overlay style
+  // Make Flutter draw behind the system navigation bar
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+
+  // Set transparent system bars
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.light,
-      systemNavigationBarColor: Colors.white,
-      systemNavigationBarIconBrightness: Brightness.dark,
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarDividerColor: Colors.transparent,
     ),
   );
 
@@ -51,6 +55,7 @@ class _StudentAppState extends State<StudentApp> {
   late final AuthService _authService;
   late final PlanningService _planningService;
   late final GradesService _gradesService;
+  late final AbsencesService _absencesService;
 
   @override
   void initState() {
@@ -67,6 +72,7 @@ class _StudentAppState extends State<StudentApp> {
     );
     _planningService = PlanningService(apiClient: _apiClient);
     _gradesService = GradesService(apiClient: _apiClient);
+    _absencesService = AbsencesService(apiClient: _apiClient);
   }
 
   @override
@@ -89,14 +95,49 @@ class _StudentAppState extends State<StudentApp> {
         ChangeNotifierProvider(
           create: (_) => GradesProvider(gradesService: _gradesService),
         ),
+        ChangeNotifierProvider(
+          create: (_) => AbsencesProvider(absencesService: _absencesService),
+        ),
       ],
       child: Consumer<SettingsProvider>(
         builder: (context, settings, _) {
-          return MaterialApp(
-            title: settings.strings.appName,
-            debugShowCheckedModeBanner: false,
-            theme: AppTheme.light,
-            home: const AppShell(),
+          // Wait for settings to be initialized
+          if (!settings.isInitialized) {
+            return const MaterialApp(
+              debugShowCheckedModeBanner: false,
+              home: Scaffold(body: Center(child: CircularProgressIndicator())),
+            );
+          }
+
+          // Determine if dark mode is active
+          final isDark =
+              settings.themeMode == ThemeMode.dark ||
+              (settings.themeMode == ThemeMode.system &&
+                  WidgetsBinding
+                          .instance
+                          .platformDispatcher
+                          .platformBrightness ==
+                      Brightness.dark);
+
+          return AnnotatedRegion<SystemUiOverlayStyle>(
+            value: SystemUiOverlayStyle(
+              statusBarColor: Colors.transparent,
+              statusBarIconBrightness: isDark
+                  ? Brightness.light
+                  : Brightness.dark,
+              systemNavigationBarColor: Colors.transparent,
+              systemNavigationBarIconBrightness: isDark
+                  ? Brightness.light
+                  : Brightness.dark,
+            ),
+            child: MaterialApp(
+              title: settings.strings.appName,
+              debugShowCheckedModeBanner: false,
+              theme: AppTheme.light,
+              darkTheme: AppTheme.dark,
+              themeMode: settings.themeMode,
+              home: const AppShell(),
+            ),
           );
         },
       ),

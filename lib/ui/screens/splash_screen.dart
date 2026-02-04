@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../../core/theme/app_colors.dart';
 
 /// Splash screen shown during app initialization
@@ -8,34 +7,21 @@ class SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
-        statusBarBrightness: Brightness.light,
-        statusBarIconBrightness: Brightness.dark,
-        statusBarColor: Colors.transparent,
-        systemNavigationBarColor: Colors.transparent,
-        systemNavigationBarIconBrightness: Brightness.dark,
-      ),
-      child: Scaffold(
-        backgroundColor: AppColors.background,
-        body: Center(
-          child: Container(
-            width: 100,
-            height: 100,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [AppColors.gradientStart, AppColors.gradientEnd],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-              borderRadius: BorderRadius.circular(24),
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: Center(
+        child: Container(
+          width: 100,
+          height: 100,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [AppColors.gradientStart, AppColors.gradientEnd],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
             ),
-            child: const Icon(
-              Icons.school,
-              size: 50,
-              color: AppColors.textLight,
-            ),
+            borderRadius: BorderRadius.circular(24),
           ),
+          child: const Icon(Icons.school, size: 50, color: AppColors.textLight),
         ),
       ),
     );

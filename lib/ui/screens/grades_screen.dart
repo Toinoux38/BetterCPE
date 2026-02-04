@@ -33,8 +33,13 @@ class _GradesScreenState extends State<GradesScreen> {
   Widget build(BuildContext context) {
     return Consumer2<GradesProvider, SettingsProvider>(
       builder: (context, grades, settings, _) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final backgroundColor = isDark
+            ? AppColors.backgroundDark
+            : AppColors.background;
+
         return Container(
-          color: AppColors.background,
+          color: backgroundColor,
           child: SafeArea(
             child: Column(
               children: [
@@ -62,6 +67,11 @@ class _GradesHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimaryColor = isDark
+        ? AppColors.textPrimaryDark
+        : AppColors.textPrimary;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
       child: Row(
@@ -85,7 +95,7 @@ class _GradesHeader extends StatelessWidget {
             style: GoogleFonts.poppins(
               fontSize: 24,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: textPrimaryColor,
             ),
           ),
         ],
@@ -106,10 +116,14 @@ class _MainCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = isDark ? AppColors.surfaceDark : AppColors.surface;
+    final dividerColor = isDark ? AppColors.dividerDark : AppColors.divider;
+
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: surfaceColor,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
@@ -125,7 +139,7 @@ class _MainCard extends StatelessWidget {
           children: [
             // Stats bar
             _StatsBar(grades: grades, strings: settings.strings),
-            const Divider(height: 1, color: AppColors.divider),
+            Divider(height: 1, color: dividerColor),
             // Content
             Expanded(child: _buildContent()),
           ],
@@ -170,6 +184,9 @@ class _StatsBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final dividerColor = isDark ? AppColors.dividerDark : AppColors.divider;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
@@ -180,7 +197,7 @@ class _StatsBar extends StatelessWidget {
             value: grades.totalCourses.toString(),
             label: strings.courses,
           ),
-          Container(width: 1, height: 32, color: AppColors.divider),
+          Container(width: 1, height: 32, color: dividerColor),
           _StatItem(
             icon: Iconsax.document_text,
             value: grades.totalGradedExams.toString(),
@@ -205,6 +222,14 @@ class _StatItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimaryColor = isDark
+        ? AppColors.textPrimaryDark
+        : AppColors.textPrimary;
+    final textSecondaryColor = isDark
+        ? AppColors.textSecondaryDark
+        : AppColors.textSecondary;
+
     return Row(
       children: [
         Container(
@@ -229,14 +254,14 @@ class _StatItem extends StatelessWidget {
               style: GoogleFonts.poppins(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+                color: textPrimaryColor,
               ),
             ),
             Text(
               label,
               style: GoogleFonts.poppins(
                 fontSize: 12,
-                color: AppColors.textSecondary,
+                color: textSecondaryColor,
               ),
             ),
           ],
@@ -287,6 +312,11 @@ class _EmptyGrades extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textSecondaryColor = isDark
+        ? AppColors.textSecondaryDark
+        : AppColors.textSecondary;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -294,7 +324,7 @@ class _EmptyGrades extends StatelessWidget {
           Icon(
             Iconsax.medal,
             size: 64,
-            color: AppColors.textSecondary.withOpacity(0.4),
+            color: textSecondaryColor.withOpacity(0.4),
           ),
           const SizedBox(height: 16),
           Text(
@@ -302,7 +332,7 @@ class _EmptyGrades extends StatelessWidget {
             style: GoogleFonts.poppins(
               fontSize: 16,
               fontWeight: FontWeight.w500,
-              color: AppColors.textSecondary,
+              color: textSecondaryColor,
             ),
           ),
         ],
@@ -330,13 +360,22 @@ class _CourseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceVariantColor = isDark
+        ? AppColors.surfaceVariantDark
+        : AppColors.surfaceVariant;
+    final textPrimaryColor = isDark
+        ? AppColors.textPrimaryDark
+        : AppColors.textPrimary;
+    final dividerColor = isDark ? AppColors.dividerDark : AppColors.divider;
+
     final average = course.averageGrade;
     final gradeColor = GradeUtils.getGradeColor(average);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: AppColors.surfaceVariant,
+        color: surfaceVariantColor,
         borderRadius: BorderRadius.circular(16),
         border: isExpanded
             ? Border.all(
@@ -395,7 +434,7 @@ class _CourseCard extends StatelessWidget {
                           style: GoogleFonts.poppins(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
+                            color: textPrimaryColor,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -429,7 +468,7 @@ class _CourseCard extends StatelessWidget {
           ),
           // Expanded exams
           if (isExpanded && course.epreuves.isNotEmpty) ...[
-            const Divider(height: 1, color: AppColors.divider),
+            Divider(height: 1, color: dividerColor),
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -445,26 +484,36 @@ class _CourseCard extends StatelessWidget {
   }
 
   Widget _buildChip(IconData icon, String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 12, color: AppColors.textSecondary),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: GoogleFonts.poppins(
-              fontSize: 11,
-              color: AppColors.textSecondary,
-            ),
+    return Builder(
+      builder: (context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final surfaceColor = isDark ? AppColors.surfaceDark : AppColors.surface;
+        final textSecondaryColor = isDark
+            ? AppColors.textSecondaryDark
+            : AppColors.textSecondary;
+
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: surfaceColor,
+            borderRadius: BorderRadius.circular(6),
           ),
-        ],
-      ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 12, color: textSecondaryColor),
+              const SizedBox(width: 4),
+              Text(
+                label,
+                style: GoogleFonts.poppins(
+                  fontSize: 11,
+                  color: textSecondaryColor,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -496,6 +545,15 @@ class _ExamRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = isDark ? AppColors.surfaceDark : AppColors.surface;
+    final textPrimaryColor = isDark
+        ? AppColors.textPrimaryDark
+        : AppColors.textPrimary;
+    final textSecondaryColor = isDark
+        ? AppColors.textSecondaryDark
+        : AppColors.textSecondary;
+
     final grade = exam.grade;
     final gradeColor = exam.estAbsent
         ? AppColors.error
@@ -505,7 +563,7 @@ class _ExamRow extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: surfaceColor,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -519,7 +577,7 @@ class _ExamRow extends StatelessWidget {
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: AppColors.textPrimary,
+                    color: textPrimaryColor,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -530,7 +588,7 @@ class _ExamRow extends StatelessWidget {
                     exam.intervenants!,
                     style: GoogleFonts.poppins(
                       fontSize: 12,
-                      color: AppColors.textSecondary,
+                      color: textSecondaryColor,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

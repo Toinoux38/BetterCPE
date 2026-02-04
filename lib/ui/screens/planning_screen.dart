@@ -124,8 +124,13 @@ class _PlanningScreenState extends State<PlanningScreen> {
   Widget build(BuildContext context) {
     return Consumer2<PlanningProvider, SettingsProvider>(
       builder: (context, planning, settings, _) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final backgroundColor = isDark
+            ? AppColors.backgroundDark
+            : AppColors.background;
+
         return Container(
-          color: AppColors.background,
+          color: backgroundColor,
           child: SafeArea(
             child: Column(
               children: [
@@ -201,6 +206,14 @@ class _DateDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimaryColor = isDark
+        ? AppColors.textPrimaryDark
+        : AppColors.textPrimary;
+    final textSecondaryColor = isDark
+        ? AppColors.textSecondaryDark
+        : AppColors.textSecondary;
+
     final dayNumber = selectedDate.day.toString();
     final dayName = date_utils.DateUtils.formatDayName(selectedDate);
     final monthYear = date_utils.DateUtils.formatMonthYear(selectedDate);
@@ -213,7 +226,7 @@ class _DateDisplay extends StatelessWidget {
           style: GoogleFonts.poppins(
             fontSize: 48,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: textPrimaryColor,
             height: 1.0,
           ),
         ),
@@ -227,7 +240,7 @@ class _DateDisplay extends StatelessWidget {
               style: GoogleFonts.poppins(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
-                color: AppColors.textSecondary,
+                color: textSecondaryColor,
               ),
             ),
             Text(
@@ -235,7 +248,7 @@ class _DateDisplay extends StatelessWidget {
               style: GoogleFonts.poppins(
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
-                color: AppColors.textSecondary,
+                color: textSecondaryColor,
               ),
             ),
           ],
@@ -331,10 +344,14 @@ class _MainCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = isDark ? AppColors.surfaceDark : AppColors.surface;
+    final dividerColor = isDark ? AppColors.dividerDark : AppColors.divider;
+
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: surfaceColor,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
@@ -356,7 +373,7 @@ class _MainCard extends StatelessWidget {
               onPreviousWeek: onPreviousWeek,
               onNextWeek: onNextWeek,
             ),
-            const Divider(height: 1, color: AppColors.divider),
+            Divider(height: 1, color: dividerColor),
             // Content
             Expanded(child: _buildContent()),
           ],
@@ -491,15 +508,23 @@ class _DayItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimaryColor = isDark
+        ? AppColors.textPrimaryDark
+        : AppColors.textPrimary;
+    final textSecondaryColor = isDark
+        ? AppColors.textSecondaryDark
+        : AppColors.textSecondary;
+
     final numberColor = isSelected
         ? Colors.white
         : isEnabled
-        ? AppColors.textPrimary
-        : AppColors.textSecondary.withOpacity(0.4);
+        ? textPrimaryColor
+        : textSecondaryColor.withOpacity(0.4);
 
     final letterColor = isSelected
         ? Colors.white.withOpacity(0.8)
-        : AppColors.textSecondary;
+        : textSecondaryColor;
 
     return GestureDetector(
       onTap: onTap,
@@ -664,6 +689,11 @@ class _EmptyDay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textSecondaryColor = isDark
+        ? AppColors.textSecondaryDark
+        : AppColors.textSecondary;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -671,7 +701,7 @@ class _EmptyDay extends StatelessWidget {
           Icon(
             Iconsax.calendar_1,
             size: 64,
-            color: AppColors.textSecondary.withOpacity(0.4),
+            color: textSecondaryColor.withOpacity(0.4),
           ),
           const SizedBox(height: 16),
           Text(
@@ -679,7 +709,7 @@ class _EmptyDay extends StatelessWidget {
             style: GoogleFonts.poppins(
               fontSize: 16,
               fontWeight: FontWeight.w500,
-              color: AppColors.textSecondary,
+              color: textSecondaryColor,
             ),
           ),
         ],
@@ -707,6 +737,13 @@ class _CourseCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isOngoing = event.isOngoing;
     final isPast = event.isPast;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimaryColor = isDark
+        ? AppColors.textPrimaryDark
+        : AppColors.textPrimary;
+    final textSecondaryColor = isDark
+        ? AppColors.textSecondaryDark
+        : AppColors.textSecondary;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -726,16 +763,14 @@ class _CourseCard extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: isPast
-                          ? AppColors.textSecondary
-                          : AppColors.textPrimary,
+                      color: isPast ? textSecondaryColor : textPrimaryColor,
                     ),
                   ),
                   Text(
                     event.endTime,
                     style: GoogleFonts.poppins(
                       fontSize: 12,
-                      color: AppColors.textSecondary,
+                      color: textSecondaryColor,
                     ),
                   ),
                 ],
@@ -772,13 +807,24 @@ class _CardContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textColor = isOngoing ? Colors.white : AppColors.textPrimary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimaryColor = isDark
+        ? AppColors.textPrimaryDark
+        : AppColors.textPrimary;
+    final textSecondaryColor = isDark
+        ? AppColors.textSecondaryDark
+        : AppColors.textSecondary;
+    final surfaceVariantColor = isDark
+        ? AppColors.surfaceVariantDark
+        : AppColors.surfaceVariant;
+
+    final textColor = isOngoing ? Colors.white : textPrimaryColor;
     final secondaryColor = isOngoing
         ? Colors.white.withOpacity(0.8)
-        : AppColors.textSecondary;
+        : textSecondaryColor;
     final iconColor = isOngoing
         ? Colors.white.withOpacity(0.9)
-        : AppColors.textSecondary;
+        : textSecondaryColor;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -793,8 +839,8 @@ class _CardContent extends StatelessWidget {
         color: isOngoing
             ? null
             : isPast
-            ? AppColors.surfaceVariant.withOpacity(0.5)
-            : AppColors.surfaceVariant,
+            ? surfaceVariantColor.withOpacity(0.5)
+            : surfaceVariantColor,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -886,14 +932,20 @@ class _CourseDetailSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isOngoing = event.isOngoing;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = isDark ? AppColors.surfaceDark : AppColors.surface;
+    final dividerColor = isDark ? AppColors.dividerDark : AppColors.divider;
+    final textPrimaryColor = isDark
+        ? AppColors.textPrimaryDark
+        : AppColors.textPrimary;
 
     return Container(
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.85,
       ),
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: surfaceColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -904,7 +956,7 @@ class _CourseDetailSheet extends StatelessWidget {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: AppColors.divider,
+              color: dividerColor,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -967,7 +1019,9 @@ class _CourseDetailSheet extends StatelessWidget {
                 IconButton(
                   onPressed: () => Navigator.pop(context),
                   icon: const Icon(Iconsax.close_circle),
-                  color: AppColors.textSecondary,
+                  color: isDark
+                      ? AppColors.textSecondaryDark
+                      : AppColors.textSecondary,
                 ),
               ],
             ),
@@ -985,7 +1039,7 @@ class _CourseDetailSheet extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontSize: 24,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                      color: textPrimaryColor,
                     ),
                   ),
                   if (event.typeActivite != null) ...[
@@ -1048,7 +1102,9 @@ class _CourseDetailSheet extends StatelessWidget {
                       style: GoogleFonts.poppins(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textSecondary,
+                        color: isDark
+                            ? AppColors.textSecondaryDark
+                            : AppColors.textSecondary,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -1056,14 +1112,16 @@ class _CourseDetailSheet extends StatelessWidget {
                       width: double.infinity,
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: AppColors.surfaceVariant,
+                        color: isDark
+                            ? AppColors.surfaceVariantDark
+                            : AppColors.surfaceVariant,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
                         event.description!,
                         style: GoogleFonts.poppins(
                           fontSize: 14,
-                          color: AppColors.textPrimary,
+                          color: textPrimaryColor,
                           height: 1.5,
                         ),
                       ),
@@ -1094,6 +1152,17 @@ class _DetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimaryColor = isDark
+        ? AppColors.textPrimaryDark
+        : AppColors.textPrimary;
+    final textSecondaryColor = isDark
+        ? AppColors.textSecondaryDark
+        : AppColors.textSecondary;
+    final surfaceVariantColor = isDark
+        ? AppColors.surfaceVariantDark
+        : AppColors.surfaceVariant;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
@@ -1103,10 +1172,10 @@ class _DetailRow extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: AppColors.surfaceVariant,
+              color: surfaceVariantColor,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, size: 20, color: AppColors.textSecondary),
+            child: Icon(icon, size: 20, color: textSecondaryColor),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -1117,7 +1186,7 @@ class _DetailRow extends StatelessWidget {
                   label,
                   style: GoogleFonts.poppins(
                     fontSize: 12,
-                    color: AppColors.textSecondary,
+                    color: textSecondaryColor,
                   ),
                 ),
                 Text(
@@ -1125,7 +1194,7 @@ class _DetailRow extends StatelessWidget {
                   style: GoogleFonts.poppins(
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
-                    color: valueColor ?? AppColors.textPrimary,
+                    color: valueColor ?? textPrimaryColor,
                   ),
                 ),
               ],
