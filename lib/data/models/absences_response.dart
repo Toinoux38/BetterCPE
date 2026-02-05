@@ -16,14 +16,18 @@ class AbsencesResponse {
 
   factory AbsencesResponse.fromJson(Map<String, dynamic> json) {
     return AbsencesResponse(
-      nbrTotalAbsenceExcuser: json['nbr_total_absence_excuser'] as int,
-      nbrTotalAbsenceNonExcuser: json['nbr_total_absence_non_excuser'] as int,
-      dureeTotaleAbsenceExcuser: json['duree_totale_absence_excuser'] as String,
+      nbrTotalAbsenceExcuser: json['nbr_total_absence_excuser'] as int? ?? 0,
+      nbrTotalAbsenceNonExcuser:
+          json['nbr_total_absence_non_excuser'] as int? ?? 0,
+      dureeTotaleAbsenceExcuser:
+          json['duree_totale_absence_excuser'] as String? ?? '0h00',
       dureeTotaleAbsenceNonExcuser:
-          json['duree_totale_absence_non_excuser'] as String,
-      absences: (json['absences'] as List<dynamic>)
-          .map((e) => Absence.fromJson(e as Map<String, dynamic>))
-          .toList(),
+          json['duree_totale_absence_non_excuser'] as String? ?? '0h00',
+      absences:
+          (json['absences'] as List<dynamic>?)
+              ?.map((e) => Absence.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
     );
   }
 
@@ -54,12 +58,14 @@ class Absence {
 
   factory Absence.fromJson(Map<String, dynamic> json) {
     return Absence(
-      id: json['id'] as int,
-      duree: json['duree'] as String,
-      motifAbsence:
-          MotifAbsence.fromJson(json['motif_absence'] as Map<String, dynamic>),
-      evenement:
-          Evenement.fromJson(json['evenement'] as Map<String, dynamic>),
+      id: json['id'] as int? ?? 0,
+      duree: json['duree'] as String? ?? '',
+      motifAbsence: MotifAbsence.fromJson(
+        json['motif_absence'] as Map<String, dynamic>? ?? {},
+      ),
+      evenement: Evenement.fromJson(
+        json['evenement'] as Map<String, dynamic>? ?? {},
+      ),
     );
   }
 
@@ -87,18 +93,14 @@ class MotifAbsence {
 
   factory MotifAbsence.fromJson(Map<String, dynamic> json) {
     return MotifAbsence(
-      id: json['id'] as int,
-      libelle: json['libelle'] as String,
-      estExcuser: json['est_excuser'] as bool,
+      id: json['id'] as int? ?? 0,
+      libelle: json['libelle'] as String? ?? '',
+      estExcuser: json['est_excuser'] as bool? ?? false,
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'libelle': libelle,
-      'est_excuser': estExcuser,
-    };
+    return {'id': id, 'libelle': libelle, 'est_excuser': estExcuser};
   }
 }
 
@@ -118,10 +120,10 @@ class Evenement {
 
   factory Evenement.fromJson(Map<String, dynamic> json) {
     return Evenement(
-      dateDebut: json['date_debut'] as String,
-      dateFin: json['date_fin'] as String,
-      intervenants: json['intervenants'] as String,
-      libelleConstruit: json['libelle_construit'] as String,
+      dateDebut: json['date_debut'] as String? ?? '',
+      dateFin: json['date_fin'] as String? ?? '',
+      intervenants: json['intervenants'] as String? ?? '',
+      libelleConstruit: json['libelle_construit'] as String? ?? '',
     );
   }
 

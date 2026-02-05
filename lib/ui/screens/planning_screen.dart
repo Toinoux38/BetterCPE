@@ -31,7 +31,10 @@ class _PlanningScreenState extends State<PlanningScreen> {
 
   void _initPageController() {
     final provider = context.read<PlanningProvider>();
-    _pageController = PageController(initialPage: provider.selectedDayIndex);
+    _pageController = PageController(
+      initialPage: provider.selectedDayIndex,
+      viewportFraction: 1.0,
+    );
   }
 
   void _loadInitialData() {
@@ -49,55 +52,56 @@ class _PlanningScreenState extends State<PlanningScreen> {
     super.dispose();
   }
 
-  void _onPageChanged(int index) async {
+  void _onPageChanged(int index) {
     if (_isChangingWeek) return;
 
     final provider = context.read<PlanningProvider>();
 
-    // Check for week boundary crossing
-    if (index > 4) {
-      // Trying to go past Friday -> next week Monday
-      await _goToNextWeek();
-    } else if (index < 0) {
-      // This shouldn't happen with PageView but safety check
-      await _goToPreviousWeek();
-    } else {
+    if (index >= 0 && index <= 4) {
       provider.selectDay(index);
     }
   }
 
   Future<void> _goToNextWeek() async {
     if (_isChangingWeek) return;
+
     setState(() => _isChangingWeek = true);
 
     final provider = context.read<PlanningProvider>();
     await provider.nextWeek();
     provider.selectDay(0); // Monday
 
-    // Recreate page controller at Monday
+    // Recreate page controller at Monday without animation
     _pageController.dispose();
     _pageController = PageController(initialPage: 0);
 
-    setState(() => _isChangingWeek = false);
+    if (mounted) {
+      setState(() => _isChangingWeek = false);
+    }
   }
 
   Future<void> _goToPreviousWeek() async {
     if (_isChangingWeek) return;
+
     setState(() => _isChangingWeek = true);
 
     final provider = context.read<PlanningProvider>();
     await provider.previousWeek();
     provider.selectDay(4); // Friday
 
-    // Recreate page controller at Friday
+    // Recreate page controller at Friday without animation
     _pageController.dispose();
     _pageController = PageController(initialPage: 4);
 
-    setState(() => _isChangingWeek = false);
+    if (mounted) {
+      setState(() => _isChangingWeek = false);
+    }
   }
 
   void _onDayTapped(int dayIndex) {
     if (_isChangingWeek) return;
+    if (dayIndex < 0 || dayIndex > 4) return;
+
     final provider = context.read<PlanningProvider>();
     provider.selectDay(dayIndex);
 
@@ -111,13 +115,20 @@ class _PlanningScreenState extends State<PlanningScreen> {
   }
 
   Future<void> _goToToday() async {
+    if (_isChangingWeek) return;
+
+    setState(() => _isChangingWeek = true);
+
     final provider = context.read<PlanningProvider>();
     await provider.goToToday();
 
     // Reset page controller to today's day
     _pageController.dispose();
     _pageController = PageController(initialPage: provider.selectedDayIndex);
-    setState(() {});
+
+    if (mounted) {
+      setState(() => _isChangingWeek = false);
+    }
   }
 
   @override
@@ -347,9 +358,11 @@ class _MainCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final surfaceColor = isDark ? AppColors.surfaceDark : AppColors.surface;
     final dividerColor = isDark ? AppColors.dividerDark : AppColors.divider;
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final navBarSpace = 70 + (bottomPadding > 0 ? bottomPadding : 24);
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      margin: EdgeInsets.fromLTRB(16, 0, 16, navBarSpace.toDouble()),
       decoration: BoxDecoration(
         color: surfaceColor,
         borderRadius: BorderRadius.circular(24),
@@ -438,6 +451,7 @@ class _DaySelector extends StatefulWidget {
 
 class _DaySelectorState extends State<_DaySelector> {
   double _dragDistance = 0;
+  bool _isProcessingSwipe = false;
 
   @override
   Widget build(BuildContext context) {
@@ -446,17 +460,30 @@ class _DaySelectorState extends State<_DaySelector> {
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onHorizontalDragStart: (_) => _dragDistance = 0,
+      onHorizontalDragStart: (_) {
+        _dragDistance = 0;
+        _isProcessingSwipe = false;
+      },
       onHorizontalDragUpdate: (details) {
+        if (_isProcessingSwipe) return;
         _dragDistance += details.delta.dx;
       },
       onHorizontalDragEnd: (details) {
+        if (_isProcessingSwipe) return;
+
         final velocity = details.primaryVelocity ?? 0;
-        // Trigger on velocity OR distance threshold
-        if (velocity > 150 || _dragDistance > 60) {
-          widget.onPreviousWeek();
-        } else if (velocity < -150 || _dragDistance < -60) {
-          widget.onNextWeek();
+
+        final hasSignificantVelocity = velocity.abs() > 500;
+        final hasSignificantDistance = _dragDistance.abs() > 100;
+
+        if ((hasSignificantVelocity && hasSignificantDistance) ||
+            _dragDistance.abs() > 150) {
+          _isProcessingSwipe = true;
+          if (_dragDistance > 0) {
+            widget.onPreviousWeek();
+          } else {
+            widget.onNextWeek();
+          }
         }
         _dragDistance = 0;
       },
@@ -577,7 +604,7 @@ class _DayItem extends StatelessWidget {
 // COURSES VIEW
 // =============================================================================
 
-class _CoursesView extends StatelessWidget {
+class _CoursesView extends StatefulWidget {
   final PlanningProvider planning;
   final PageController pageController;
   final ValueChanged<int> onPageChanged;
@@ -595,31 +622,69 @@ class _CoursesView extends StatelessWidget {
   });
 
   @override
+  State<_CoursesView> createState() => _CoursesViewState();
+}
+
+class _CoursesViewState extends State<_CoursesView> {
+  double _overscrollAccumulator = 0;
+  bool _isHandlingOverscroll = false;
+  static const double _overscrollThreshold = 80.0;
+
+  @override
   Widget build(BuildContext context) {
-    return NotificationListener<OverscrollNotification>(
+    return NotificationListener<ScrollNotification>(
       onNotification: (notification) {
-        // Detect overscroll at boundaries
-        if (notification.overscroll > 0 && pageController.page?.round() == 4) {
-          // Swiping right on Friday -> next week
-          onNextWeek();
-          return true;
-        } else if (notification.overscroll < 0 &&
-            pageController.page?.round() == 0) {
-          // Swiping left on Monday -> previous week
-          onPreviousWeek();
-          return true;
+        // Handle overscroll at page boundaries for week transitions
+        if (notification is OverscrollNotification) {
+          if (_isHandlingOverscroll) return true;
+
+          final currentPage = widget.pageController.page?.round() ?? 0;
+
+          if (currentPage == 4 && notification.overscroll > 0) {
+            // Friday, swiping right 
+            _overscrollAccumulator += notification.overscroll;
+            if (_overscrollAccumulator > _overscrollThreshold) {
+              _isHandlingOverscroll = true;
+              _overscrollAccumulator = 0;
+              widget.onNextWeek();
+              // Reset after a delay to prevent double triggers
+              Future.delayed(const Duration(milliseconds: 500), () {
+                _isHandlingOverscroll = false;
+              });
+            }
+            return true;
+          } else if (currentPage == 0 && notification.overscroll < 0) {
+            // Monday, swiping left
+            _overscrollAccumulator += notification.overscroll.abs();
+            if (_overscrollAccumulator > _overscrollThreshold) {
+              _isHandlingOverscroll = true;
+              _overscrollAccumulator = 0;
+              widget.onPreviousWeek();
+              Future.delayed(const Duration(milliseconds: 500), () {
+                _isHandlingOverscroll = false;
+              });
+            }
+            return true;
+          }
         }
+
+        if (notification is ScrollStartNotification ||
+            notification is ScrollEndNotification) {
+          _overscrollAccumulator = 0;
+        }
+
         return false;
       },
       child: PageView.builder(
-        controller: pageController,
-        onPageChanged: onPageChanged,
+        controller: widget.pageController,
+        onPageChanged: widget.onPageChanged,
+        physics: const ClampingScrollPhysics(),
         itemCount: 5, // Monday to Friday
         itemBuilder: (context, index) {
           return _DayPage(
-            planning: planning,
+            planning: widget.planning,
             dayIndex: index,
-            strings: strings,
+            strings: widget.strings,
           );
         },
       ),

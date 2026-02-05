@@ -74,9 +74,11 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildBottomNavigationBar(List<_NavItem> navItems) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final surfaceColor = isDark ? AppColors.surfaceDark : AppColors.surface;
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final bottomMargin = bottomPadding > 0 ? bottomPadding + 8 : 24.0;
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+      margin: EdgeInsets.fromLTRB(24, 0, 24, bottomMargin),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
         color: surfaceColor,

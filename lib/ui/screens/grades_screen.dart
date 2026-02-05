@@ -119,9 +119,11 @@ class _MainCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final surfaceColor = isDark ? AppColors.surfaceDark : AppColors.surface;
     final dividerColor = isDark ? AppColors.dividerDark : AppColors.divider;
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final navBarSpace = 70 + (bottomPadding > 0 ? bottomPadding : 24);
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      margin: EdgeInsets.fromLTRB(16, 0, 16, navBarSpace.toDouble()),
       decoration: BoxDecoration(
         color: surfaceColor,
         borderRadius: BorderRadius.circular(24),
