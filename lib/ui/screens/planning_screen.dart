@@ -41,7 +41,8 @@ class _PlanningScreenState extends State<PlanningScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final provider = context.read<PlanningProvider>();
       if (provider.state == PlanningState.initial) {
-        provider.loadWeekPlanning();
+        // Use cache-first initialization
+        provider.initializeWithCache();
       }
     });
   }
@@ -68,7 +69,7 @@ class _PlanningScreenState extends State<PlanningScreen> {
     setState(() => _isChangingWeek = true);
 
     final provider = context.read<PlanningProvider>();
-    await provider.nextWeek(); 
+    await provider.nextWeek();
 
     // recreate page controller at monday without animation
     _pageController.dispose();
@@ -85,8 +86,7 @@ class _PlanningScreenState extends State<PlanningScreen> {
     setState(() => _isChangingWeek = true);
 
     final provider = context.read<PlanningProvider>();
-    await provider
-        .previousWeek(); 
+    await provider.previousWeek();
 
     // recreate page controller at friday without animation
     _pageController.dispose();
@@ -162,6 +162,12 @@ class _PlanningScreenState extends State<PlanningScreen> {
                     isChangingWeek: _isChangingWeek,
                   ),
                 ),
+                // Sync status indicator below the card
+                if (planning.syncStatus != PlanningSyncStatus.synced)
+                  _SyncStatusIndicator(
+                    syncStatus: planning.syncStatus,
+                    strings: settings.strings,
+                  ),
               ],
             ),
           ),
@@ -204,6 +210,119 @@ class _DateHeader extends StatelessWidget {
             onTap: onTodayTap,
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _SyncStatusIndicator extends StatelessWidget {
+  final PlanningSyncStatus syncStatus;
+  final dynamic strings;
+
+  const _SyncStatusIndicator({required this.syncStatus, required this.strings});
+
+  @override
+  Widget build(BuildContext context) {
+    String text;
+    IconData icon;
+    Color color;
+
+    switch (syncStatus) {
+      case PlanningSyncStatus.syncing:
+        text = strings.syncing;
+        icon = Iconsax.refresh;
+        color = AppColors.gradientStart;
+        break;
+      case PlanningSyncStatus.cached:
+        text = strings.syncing;
+        icon = Iconsax.refresh;
+        color = AppColors.gradientStart;
+        break;
+      case PlanningSyncStatus.offline:
+        text = strings.offlineMode;
+        icon = Iconsax.wifi_square;
+        color = AppColors.warning;
+        break;
+      case PlanningSyncStatus.synced:
+        return const SizedBox.shrink();
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (syncStatus == PlanningSyncStatus.syncing ||
+              syncStatus == PlanningSyncStatus.cached)
+            SizedBox(
+              width: 14,
+              height: 14,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(color),
+              ),
+            )
+          else
+            Icon(icon, size: 14, color: color),
+          const SizedBox(width: 6),
+          Text(
+            text,
+            style: GoogleFonts.poppins(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LastUpdatedFooter extends StatelessWidget {
+  final DateTime lastSyncTime;
+  final dynamic strings;
+
+  const _LastUpdatedFooter({required this.lastSyncTime, required this.strings});
+
+  String _formatTime(DateTime time) {
+    final now = DateTime.now();
+    final diff = now.difference(time);
+
+    if (diff.inMinutes < 1) {
+      return 'just now';
+    } else if (diff.inMinutes < 60) {
+      return '${diff.inMinutes}min ago';
+    } else if (diff.inHours < 24 && now.day == time.day) {
+      final hour = time.hour.toString().padLeft(2, '0');
+      final minute = time.minute.toString().padLeft(2, '0');
+      return '$hour:$minute';
+    } else {
+      final day = time.day.toString().padLeft(2, '0');
+      final month = time.month.toString().padLeft(2, '0');
+      final hour = time.hour.toString().padLeft(2, '0');
+      final minute = time.minute.toString().padLeft(2, '0');
+      return '$day/$month $hour:$minute';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textSecondaryColor = isDark
+        ? AppColors.textSecondaryDark
+        : AppColors.textSecondary;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Text(
+        '${strings.lastUpdated}: ${_formatTime(lastSyncTime)}',
+        style: GoogleFonts.poppins(
+          fontSize: 11,
+          fontWeight: FontWeight.w400,
+          color: textSecondaryColor.withOpacity(0.5),
+        ),
       ),
     );
   }
@@ -357,8 +476,9 @@ class _MainCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final surfaceColor = isDark ? AppColors.surfaceDark : AppColors.surface;
     final dividerColor = isDark ? AppColors.dividerDark : AppColors.divider;
+    // Account for floating navigation bar
     final bottomPadding = MediaQuery.of(context).padding.bottom;
-    final navBarSpace = 70 + (bottomPadding > 0 ? bottomPadding : 24);
+    final navBarSpace = 56 + (bottomPadding > 0 ? bottomPadding : 16);
 
     return Container(
       margin: EdgeInsets.fromLTRB(16, 0, 16, navBarSpace.toDouble()),
@@ -388,6 +508,12 @@ class _MainCard extends StatelessWidget {
             Divider(height: 1, color: dividerColor),
             // Content
             Expanded(child: _buildContent()),
+            // Last updated footer
+            if (planning.lastSyncTime != null)
+              _LastUpdatedFooter(
+                lastSyncTime: planning.lastSyncTime!,
+                strings: settings.strings,
+              ),
           ],
         ),
       ),
@@ -635,6 +761,9 @@ class _CoursesViewState extends State<_CoursesView> {
       onNotification: (notification) {
         // Handle overscroll at page boundaries for week transitions
         if (notification is OverscrollNotification) {
+          // Only handle horizontal overscrolls (from PageView), not vertical (from ListView/RefreshIndicator)
+          if (notification.metrics.axis != Axis.horizontal) return false;
+
           if (_isHandlingOverscroll) return true;
 
           final currentPage = widget.pageController.page?.round() ?? 0;
@@ -684,6 +813,7 @@ class _CoursesViewState extends State<_CoursesView> {
             planning: widget.planning,
             dayIndex: index,
             strings: widget.strings,
+            isOffline: widget.planning.isOffline,
           );
         },
       ),
@@ -695,23 +825,33 @@ class _DayPage extends StatelessWidget {
   final PlanningProvider planning;
   final int dayIndex;
   final dynamic strings;
+  final bool isOffline;
 
   const _DayPage({
     required this.planning,
     required this.dayIndex,
     required this.strings,
+    required this.isOffline,
   });
 
   @override
   Widget build(BuildContext context) {
     if (dayIndex >= planning.weekPlanning.length) {
-      return _EmptyDay(message: strings.noClassesScheduled);
+      return _EmptyDay(
+        message: strings.noClassesScheduled,
+        isOffline: isOffline,
+        strings: strings,
+      );
     }
 
     final dayPlanning = planning.weekPlanning[dayIndex];
 
     if (!dayPlanning.hasCourses) {
-      return _EmptyDay(message: strings.noClassesScheduled);
+      return _EmptyDay(
+        message: strings.noClassesScheduled,
+        isOffline: isOffline,
+        strings: strings,
+      );
     }
 
     return RefreshIndicator(
@@ -748,8 +888,14 @@ class _DayPage extends StatelessWidget {
 
 class _EmptyDay extends StatelessWidget {
   final String message;
+  final bool isOffline;
+  final dynamic strings;
 
-  const _EmptyDay({required this.message});
+  const _EmptyDay({
+    required this.message,
+    required this.isOffline,
+    required this.strings,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -776,6 +922,17 @@ class _EmptyDay extends StatelessWidget {
               color: textSecondaryColor,
             ),
           ),
+          if (isOffline) ...[
+            const SizedBox(height: 8),
+            Text(
+              strings.mayNotBeUpToDate,
+              style: GoogleFonts.poppins(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: AppColors.warning,
+              ),
+            ),
+          ],
         ],
       ),
     );

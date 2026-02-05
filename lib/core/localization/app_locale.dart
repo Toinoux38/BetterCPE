@@ -11,7 +11,7 @@ enum AppLocale {
   static AppLocale fromCode(String code) {
     return AppLocale.values.firstWhere(
       (locale) => locale.code == code,
-      orElse: () => AppLocale.english,
+      orElse: () => AppLocale.french,
     );
   }
 }

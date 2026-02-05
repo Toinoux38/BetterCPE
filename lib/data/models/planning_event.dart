@@ -49,6 +49,24 @@ class PlanningEvent {
     );
   }
 
+  /// Convert to JSON for caching
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'date_debut': dateDebut?.toIso8601String(),
+      'date_fin': dateFin?.toIso8601String(),
+      'duree': duree,
+      'matiere': matiere,
+      'type_activite': typeActivite,
+      'statut_intervention': statutIntervention,
+      'intervenants': intervenants,
+      'ressource': salle,
+      'is_break': isBreak,
+      'is_empty': isEmpty,
+      'description': description,
+    };
+  }
+
   /// Get formatted start time only
   String get startTime {
     if (dateDebut == null) return '';

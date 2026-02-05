@@ -100,6 +100,12 @@ abstract class AppStrings {
   String get noInternetConnection;
   String get unexpectedError;
 
+  // Sync status
+  String get syncing;
+  String get offlineMode;
+  String get lastUpdated;
+  String get mayNotBeUpToDate;
+
   // Days
   String get monday;
   String get tuesday;
@@ -310,6 +316,16 @@ class EnglishStrings implements AppStrings {
   String get noInternetConnection => 'No internet connection';
   @override
   String get unexpectedError => 'An unexpected error occurred';
+
+  // Sync status
+  @override
+  String get syncing => 'Updating...';
+  @override
+  String get offlineMode => 'Offline';
+  @override
+  String get lastUpdated => 'Updated';
+  @override
+  String get mayNotBeUpToDate => 'May not be up to date';
 
   // Days
   @override
@@ -535,6 +551,16 @@ class FrenchStrings implements AppStrings {
   String get noInternetConnection => 'Pas de connexion internet';
   @override
   String get unexpectedError => 'Une erreur inattendue s\'est produite';
+
+  // Sync status
+  @override
+  String get syncing => 'Mise à jour...';
+  @override
+  String get offlineMode => 'Hors ligne';
+  @override
+  String get lastUpdated => 'Mis à jour';
+  @override
+  String get mayNotBeUpToDate => 'Peut ne pas être à jour';
 
   // Days
   @override

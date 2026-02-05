@@ -119,8 +119,9 @@ class _MainCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final surfaceColor = isDark ? AppColors.surfaceDark : AppColors.surface;
     final dividerColor = isDark ? AppColors.dividerDark : AppColors.divider;
+    // Account for floating navigation bar
     final bottomPadding = MediaQuery.of(context).padding.bottom;
-    final navBarSpace = 70 + (bottomPadding > 0 ? bottomPadding : 24);
+    final navBarSpace = 56 + (bottomPadding > 0 ? bottomPadding : 16);
 
     return Container(
       margin: EdgeInsets.fromLTRB(16, 0, 16, navBarSpace.toDouble()),

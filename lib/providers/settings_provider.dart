@@ -11,8 +11,8 @@ class SettingsProvider extends ChangeNotifier {
   
   final FlutterSecureStorage _storage;
   
-  AppLocale _locale = AppLocale.english;
-  AppStrings _strings = const EnglishStrings();
+  AppLocale _locale = AppLocale.french;
+  AppStrings _strings = const FrenchStrings();
   ThemeMode _themeMode = ThemeMode.system;
   bool _isInitialized = false;
   
